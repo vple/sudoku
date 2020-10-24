@@ -1,6 +1,6 @@
-package sudoku
+package conversion
 
-import "../sat"
+import "../../sat"
 
 // AppearsOnce specifies that the given value appears at exactly one of the given coordinates.
 func AppearsOnce(coordinates []Coordinate, value int) []sat.DisjunctiveClause {

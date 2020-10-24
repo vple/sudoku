@@ -5,29 +5,6 @@ import (
 	"time"
 )
 
-type cell struct {
-	row            int
-	col            int
-	value          int
-	possibleValues []int
-}
-
-func newCell(row, col int) *cell {
-	c := new(cell)
-	c.row = row
-	c.col = col
-	c.possibleValues = []int{1, 2, 3, 4, 5, 6, 7, 8, 9}
-	return c
-}
-
-func (c cell) variableName() string {
-	return fmt.Sprintf("%d%d", c.row, c.col)
-}
-
-func (c cell) getValue() (int, bool) {
-	return c.value, c.value != 0
-}
-
 func diagonalSudoku() Board {
 	b := `
 	 7 3 5 1 
