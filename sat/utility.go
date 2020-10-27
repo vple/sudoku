@@ -31,7 +31,7 @@ func Multiply(sets ...Literals) []Literals {
 }
 
 // ExactlyOneTrue returns clauses specifying that exactly one of the given literals is true.
-func ExactlyOneTrue(literals []Literal) []DisjunctiveClause {
+func ExactlyOneTrue(literals []Literal) ConjunctiveFormula {
 	clauses := make([]DisjunctiveClause, 0)
 	// At least one literal is true.
 	clauses = append(clauses, NewDisjunctiveClause(literals...))
@@ -43,5 +43,5 @@ func ExactlyOneTrue(literals []Literal) []DisjunctiveClause {
 		}
 	}
 
-	return clauses
+	return NewConjunctiveFormula(clauses)
 }

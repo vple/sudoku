@@ -71,6 +71,11 @@ func (c DisjunctiveClause) Evaluate(state map[string]bool) interface{} {
 	return DisjunctiveClause{literals}
 }
 
+// ToFormula returns a formula containing this clause.
+func (c DisjunctiveClause) ToFormula() ConjunctiveFormula {
+	return NewConjunctiveFormula([]DisjunctiveClause{c})
+}
+
 func (c DisjunctiveClause) String() string {
 	strs := make([]string, 0)
 	for _, literal := range c.literals {

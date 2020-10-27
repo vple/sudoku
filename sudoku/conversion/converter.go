@@ -1,81 +1,93 @@
 package conversion
 
-import "fmt"
+import (
+	sudoku ".."
+	"../../sat"
+)
 
 // ParseState parses boolean state back into a board.
-func ParseState(state map[string]bool) Board {
-	initialValues := make(map[Coordinate]int)
+func ParseState(state map[string]bool) sudoku.Board {
+	initialValues := make(map[sudoku.Coordinate]int)
 	for name, v := range state {
 		if v {
-			coordinate, value := ParseName(name)
+			coordinate, value := fromName(name)
 			initialValues[coordinate] = value
 		}
 	}
-	return NewStandardBoard(initialValues)
+	return sudoku.NewStandardBoard(initialValues)
 }
 
-// Diagonal returns the coordinates in the specified diagonal, in order.
-func (b Board) Diagonal(start, end Coordinate) (coordinates Coordinates) {
-	rowSign := 1
-	if end.row < start.row {
-		rowSign = -1
-	}
-	colSign := 1
-	if end.col < start.col {
-		colSign = -1
-	}
-
-	rows := (end.row - start.row) * rowSign
-	cols := (end.col - start.col) * colSign
-	if rows != cols {
-		panic(fmt.Sprintf("Not on a diagonal! %s, %s", start, end))
-	}
-
-	for i := 0; i <= rows; i++ {
-		row := start.row + (rowSign * i)
-		col := start.col + (colSign * i)
-		coordinates = append(coordinates, NewCoordinate(row, col))
-	}
-
-	return coordinates
-}
-
-// Formula returns the formula defining the board.
-func (b Board) Formula() ConjunctiveFormula {
-	formula := EmptyConjunctiveFormula()
+// ToFormula returns the formula that defines a board.
+func ToFormula(b sudoku.Board) sat.ConjunctiveFormula {
+	formula := sat.EmptyConjunctiveFormula()
 
 	// Constraints for individual cells.
-	clauses := make([]DisjunctiveClause, 0)
-	for _, coordinate := range b.GetAllCoordinates() {
-		clauses = append(clauses, coordinate.Clauses()...)
+	// clauses := make([]sat.DisjunctiveClause, 0)
+	for _, coordinate := range b.AllCoordinates() {
+		// Coordinate has exactly one value from 1-9.
+		hasOneValue := sat.ExactlyOneTrue(toLiterals(coordinate))
+		formula = formula.And(hasOneValue)
 
-		if value, ok := b.values[coordinate]; ok {
-			clause := NewDisjunctiveClause(coordinate.Literal(value))
-			clauses = append(clauses, clause)
+		// clauses = append(clauses, coordinate.Clauses()...)
+
+		if value, ok := b.Value(coordinate); ok {
+			// If value is known, specify it.
+			exactValue := sat.NewDisjunctiveClause(toLiteral(coordinate, value))
+			formula = formula.And(exactValue.ToFormula())
+			// clauses = append(clauses, clause)
 		}
 	}
-	formula = formula.And(ConjunctiveFormula{clauses})
+	// formula = formula.And(sat.ConjunctiveFormula{clauses})
 
-	// Constraints for rows, cols, and regions.
-	clauses = make([]DisjunctiveClause, 0)
-	for i := 1; i <= 9; i++ {
-		row := b.Row(i)
-		col := b.Col(i)
-		region := b.Region((i-1)/3+1, (i-1)%3+1)
-
-		formula = formula.And(UniqueValues(row)).And(Appears(row, allValues...))
-		formula = formula.And(UniqueValues(col)).And(Appears(col, allValues...))
-		formula = formula.And(UniqueValues(region)).And(Appears(region, allValues...))
+	// Constraints for rows.
+	for _, row := range b.AllRows() {
+		// Values in each row are unique.
+		formula = formula.And(UniqueValues(row))
+		// Each value appears in each row.
+		for value := 1; value <= b.Size(); value++ {
+			formula = formula.And(Appears(row, value))
+		}
 	}
+
+	// Constraints for cols.
+	for _, col := range b.AllCols() {
+		// Values in each col are unique.
+		formula = formula.And(UniqueValues(col))
+		// Each value appears in each col.
+		for value := 1; value <= b.Size(); value++ {
+			formula = formula.And(Appears(col, value))
+		}
+	}
+
+	// Constraints for regions.
+	for _, region := range b.AllRegions() {
+		// Values in each region are unique.
+		formula = formula.And(UniqueValues(region))
+		// Each value appears in each region.
+		for value := 1; value <= b.Size(); value++ {
+			formula = formula.And(Appears(region, value))
+		}
+	}
+
+	// for i := 1; i <= b.Size(); i++ {
+	// 	row := b.Row(i)
+	// 	col := b.Col(i)
+	// 	// Currently assumes size is 9.
+	// 	region := b.Region((i-1)/3+1, (i-1)%3+1)
+
+	// 	formula = formula.And(UniqueValues(row)).And(Appears(row, allValues...))
+	// 	formula = formula.And(UniqueValues(col)).And(Appears(col, allValues...))
+	// 	formula = formula.And(UniqueValues(region)).And(Appears(region, allValues...))
+	// }
 
 	// Additional rules.
-	if b.rules.diagonalsUnique {
-		diagonal := b.Diagonal(NewCoordinate(1, 1), NewCoordinate(9, 9))
-		formula = formula.And(UniqueValues(diagonal)).And(Appears(diagonal, allValues...))
+	// if b.rules.diagonalsUnique {
+	// 	diagonal := b.Diagonal(sudoku.NewCoordinate(1, 1), sudoku.NewCoordinate(9, 9))
+	// 	formula = formula.And(UniqueValues(diagonal)).And(Appears(diagonal, allValues...))
 
-		diagonal = b.Diagonal(NewCoordinate(1, 9), NewCoordinate(9, 1))
-		formula = formula.And(UniqueValues(diagonal)).And(Appears(diagonal, allValues...))
-	}
+	// 	diagonal = b.Diagonal(NewCoordinate(1, 9), NewCoordinate(9, 1))
+	// 	formula = formula.And(UniqueValues(diagonal)).And(Appears(diagonal, allValues...))
+	// }
 
 	return formula
 }

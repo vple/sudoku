@@ -12,7 +12,7 @@ type Expression interface {
 
 // Literal is a boolean value.
 type Literal interface {
-	GetName() string
+	Name() string
 	Negate() Literal
 	Evaluate(map[string]bool) interface{}
 }
@@ -37,20 +37,20 @@ func (pl PositiveLiteral) Negate() Literal {
 
 // Evaluate returns this literal's value if known.
 func (pl PositiveLiteral) Evaluate(state map[string]bool) interface{} {
-	value, ok := state[pl.GetName()]
+	value, ok := state[pl.Name()]
 	if !ok {
 		return pl
 	}
 	return value
 }
 
-// GetName returns the name of the variable in this literal.
-func (pl PositiveLiteral) GetName() string {
+// Name returns the name of the variable in this literal.
+func (pl PositiveLiteral) Name() string {
 	return pl.name
 }
 
 func (pl PositiveLiteral) String() string {
-	return pl.GetName()
+	return pl.Name()
 }
 
 // NegativeLiteral is the negation of a variable.
@@ -65,16 +65,16 @@ func (nl NegativeLiteral) Negate() Literal {
 
 // Evaluate returns this literal's value if known.
 func (nl NegativeLiteral) Evaluate(state map[string]bool) interface{} {
-	value, ok := state[nl.GetName()]
+	value, ok := state[nl.Name()]
 	if !ok {
 		return nl
 	}
 	return !value
 }
 
-// GetName returns the name of the variable in this literal.
-func (nl NegativeLiteral) GetName() string {
-	return nl.variable.GetName()
+// Name returns the name of the variable in this literal.
+func (nl NegativeLiteral) Name() string {
+	return nl.variable.Name()
 }
 
 func (nl NegativeLiteral) String() string {

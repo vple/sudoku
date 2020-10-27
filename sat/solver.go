@@ -65,9 +65,9 @@ func propagate(formula ConjunctiveFormula, state map[string]bool) (newState map[
 			changed = true
 			switch literal := clause.literals[0].(type) {
 			case PositiveLiteral:
-				newState[literal.GetName()] = true
+				newState[literal.Name()] = true
 			case NegativeLiteral:
-				newState[literal.GetName()] = false
+				newState[literal.Name()] = false
 			default:
 				panic("Unexpected type!")
 			}
@@ -79,7 +79,7 @@ func propagate(formula ConjunctiveFormula, state map[string]bool) (newState map[
 
 func selectLiteral(formula ConjunctiveFormula) string {
 	// TODO: Pick literal better.
-	// return formula.clauses[0].literals[0].GetName()
+	// return formula.clauses[0].literals[0].Name()
 	// return fromShortestClause(formula)
 	return mostFrequentLiteral(formula)
 }
@@ -96,14 +96,14 @@ func fromShortestClause(formula ConjunctiveFormula) string {
 		}
 	}
 
-	return best.literals[0].GetName()
+	return best.literals[0].Name()
 }
 
 func mostFrequentLiteral(formula ConjunctiveFormula) string {
 	frequency := make(map[string]int)
 	for _, clause := range formula.clauses {
 		for _, literal := range clause.literals {
-			frequency[literal.GetName()] = frequency[literal.GetName()] + 1
+			frequency[literal.Name()] = frequency[literal.Name()] + 1
 		}
 	}
 

@@ -1,12 +1,15 @@
 package conversion
 
-import "../../sat"
+import (
+	sudoku ".."
+	"../../sat"
+)
 
 // AppearsOnce specifies that the given value appears at exactly one of the given coordinates.
-func AppearsOnce(coordinates []Coordinate, value int) []sat.DisjunctiveClause {
+func AppearsOnce(coordinates []sudoku.Coordinate, value int) sat.ConjunctiveFormula {
 	literals := make([]sat.Literal, 0)
 	for _, coordinate := range coordinates {
-		literal := coordinate.Literal(value)
+		literal := toLiteral(coordinate, value)
 		literals = append(literals, literal)
 	}
 
@@ -14,12 +17,12 @@ func AppearsOnce(coordinates []Coordinate, value int) []sat.DisjunctiveClause {
 }
 
 // Appears specifies that each of the values appears at least one of the given coordinates.
-func Appears(coordinates []Coordinate, values ...int) sat.ConjunctiveFormula {
+func Appears(coordinates []sudoku.Coordinate, values ...int) sat.ConjunctiveFormula {
 	clauses := make([]sat.DisjunctiveClause, 0)
 	for _, value := range values {
 		literals := make(sat.Literals, 0)
 		for _, coordinate := range coordinates {
-			literal := coordinate.Literal(value)
+			literal := toLiteral(coordinate, value)
 			literals = append(literals, literal)
 		}
 		clauses = append(clauses, sat.NewDisjunctiveClause(literals...))
@@ -28,47 +31,50 @@ func Appears(coordinates []Coordinate, values ...int) sat.ConjunctiveFormula {
 }
 
 // UniqueValues specifies that all coordinates have unique values.
-func UniqueValues(coordinates []Coordinate) sat.ConjunctiveFormula {
+func UniqueValues(coordinates []sudoku.Coordinate) sat.ConjunctiveFormula {
 	clauses := make([]sat.DisjunctiveClause, 0)
 	for i, a := range coordinates {
 		for _, b := range coordinates[i+1:] {
 			for value := 1; value <= 9; value++ {
 				// a != value || b != value
-				clause := NewDisjunctiveClause(a.Literal(value).Negate(), b.Literal(value).Negate())
+				notA := toLiteral(a, value).Negate()
+				notB := toLiteral(b, value).Negate()
+				clause := sat.NewDisjunctiveClause(notA, notB)
 				clauses = append(clauses, clause)
 			}
 		}
 	}
-	return ConjunctiveFormula{clauses}
+	return sat.NewConjunctiveFormula(clauses)
 }
 
 // Sum sums the values of these literals as if they were true.
 func sum(literals sat.Literals) (sum int) {
 	for _, literal := range literals {
 		l := literal.(sat.PositiveLiteral)
-		sum += l.GetValue()
+		_, value := fromName(l.Name())
+		sum += value
 	}
 	return sum
 }
 
 // SumEquals returns the formula specifying that the sums of the values of the given coordinates equals the desired sum.
-func SumEquals(coordinates Coordinates, sum int) sat.ConjunctiveFormula {
-	var allCombinations []Literals = allPermutations(coordinates)
-	clauses := make([]DisjunctiveClause, 0)
+func SumEquals(coordinates sudoku.Coordinates, total int) sat.ConjunctiveFormula {
+	var allCombinations []sat.Literals = allPermutations(coordinates)
+	clauses := make([]sat.DisjunctiveClause, 0)
 	for _, combination := range allCombinations {
-		if combination.Sum() == sum {
-			clauses = append(clauses, DisjunctiveClause{combination})
+		if sum(combination) == total {
+			clauses = append(clauses, sat.NewDisjunctiveClause(combination...))
 		}
 	}
 
-	return ConjunctiveFormula{clauses}
+	return sat.NewConjunctiveFormula(clauses)
 }
 
 // allPermutations determines all possible permuations for the specified cells.
-func allPermutations(coordinates Coordinates) []sat.Literals {
-	literals := make([]Literals, 0)
+func allPermutations(coordinates sudoku.Coordinates) []sat.Literals {
+	literals := make([]sat.Literals, 0)
 	for _, coordinate := range coordinates {
-		literals = append(literals, coordinate.Literals())
+		literals = append(literals, toLiterals(coordinate))
 	}
-	return Multiply(literals...)
+	return sat.Multiply(literals...)
 }
