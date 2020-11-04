@@ -58,6 +58,17 @@ func (b Board) Size() int {
 	return b.size
 }
 
+// InBounds returns whether or not the given coordinate is in the bounds of this board.
+func (b Board) InBounds(coordinate Coordinate) bool {
+	if coordinate.Row() < 1 || coordinate.Row() > b.size {
+		return false
+	}
+	if coordinate.Col() < 1 || coordinate.Col() > b.size {
+		return false
+	}
+	return true
+}
+
 // Value returns the value at this coordinate in the board.
 func (b Board) Value(c Coordinate) (int, bool) {
 	value, ok := b.values[c]
@@ -158,6 +169,31 @@ func (b Board) Diagonal(start, end Coordinate) (coordinates Coordinates) {
 		row := start.row + (rowSign * i)
 		col := start.col + (colSign * i)
 		coordinates = append(coordinates, NewCoordinate(row, col))
+	}
+
+	return coordinates
+}
+
+// KnightMoves returns all coordinates that are a knight's move away from the given coordinate.
+func (b Board) KnightMoves(coordinate Coordinate) (coordinates Coordinates) {
+	long := []int{2, -2}
+	short := []int{1, -1}
+
+	row := coordinate.Row()
+	col := coordinate.Col()
+
+	for _, l := range long {
+		for _, s := range short {
+			c1 := NewCoordinate(row+l, col+s)
+			if b.InBounds(c1) {
+				coordinates = append(coordinates, c1)
+			}
+
+			c2 := NewCoordinate(row+s, col+l)
+			if b.InBounds(c2) {
+				coordinates = append(coordinates, c2)
+			}
+		}
 	}
 
 	return coordinates
