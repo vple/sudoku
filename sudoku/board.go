@@ -69,6 +69,16 @@ func (b Board) InBounds(coordinate Coordinate) bool {
 	return true
 }
 
+// AllValues returns the possible values on the board.
+func (b Board) AllValues() []int {
+	values := make([]int, 0)
+	for i := 1; i <= b.size; i++ {
+		values = append(values, i)
+	}
+
+	return values
+}
+
 // Value returns the value at this coordinate in the board.
 func (b Board) Value(c Coordinate) (int, bool) {
 	value, ok := b.values[c]
