@@ -24,6 +24,74 @@ func easySudoku() sudoku.Board {
 	return sudoku.ParseBoard(b)
 }
 
+func thermometerSudoku() sudoku.Board {
+	b := "" // Empty
+	board := sudoku.ParseBoard(b)
+
+	board.AddConstraint(sudoku.NewIncreasingValueConstraint(
+		sudoku.NewCoordinate(1, 2),
+		sudoku.NewCoordinate(1, 3),
+		sudoku.NewCoordinate(1, 4),
+		sudoku.NewCoordinate(2, 4),
+		sudoku.NewCoordinate(2, 3),
+		sudoku.NewCoordinate(2, 2),
+		sudoku.NewCoordinate(3, 2),
+		sudoku.NewCoordinate(3, 3),
+		sudoku.NewCoordinate(3, 4),
+	))
+
+	board.AddConstraint(sudoku.NewIncreasingValueConstraint(
+		sudoku.NewCoordinate(4, 4),
+		sudoku.NewCoordinate(4, 3),
+		sudoku.NewCoordinate(4, 2),
+	))
+
+	board.AddConstraint(sudoku.NewIncreasingValueConstraint(
+		sudoku.NewCoordinate(5, 2),
+		sudoku.NewCoordinate(6, 2),
+		sudoku.NewCoordinate(7, 2),
+		sudoku.NewCoordinate(8, 2),
+	))
+
+	board.AddConstraint(sudoku.NewIncreasingValueConstraint(
+		sudoku.NewCoordinate(8, 3),
+		sudoku.NewCoordinate(8, 4),
+		sudoku.NewCoordinate(7, 4),
+		sudoku.NewCoordinate(6, 4),
+		sudoku.NewCoordinate(5, 4),
+	))
+
+	board.AddConstraint(sudoku.NewIncreasingValueConstraint(
+		sudoku.NewCoordinate(2, 7),
+		sudoku.NewCoordinate(2, 8),
+		sudoku.NewCoordinate(2, 9),
+		sudoku.NewCoordinate(3, 9),
+		sudoku.NewCoordinate(3, 8),
+		sudoku.NewCoordinate(3, 7),
+		sudoku.NewCoordinate(4, 7),
+		sudoku.NewCoordinate(4, 8),
+		sudoku.NewCoordinate(4, 9),
+	))
+
+	board.AddConstraint(sudoku.NewIncreasingValueConstraint(
+		sudoku.NewCoordinate(9, 6),
+		sudoku.NewCoordinate(8, 6),
+		sudoku.NewCoordinate(7, 6),
+		sudoku.NewCoordinate(6, 6),
+	))
+
+	board.AddConstraint(sudoku.NewIncreasingValueConstraint(
+		sudoku.NewCoordinate(6, 7),
+		sudoku.NewCoordinate(6, 8),
+		sudoku.NewCoordinate(7, 8),
+		sudoku.NewCoordinate(8, 8),
+		sudoku.NewCoordinate(9, 8),
+		sudoku.NewCoordinate(9, 7),
+	))
+
+	return board
+}
+
 func diagonalSudoku() sudoku.Board {
 	b := `
 	 7 3 5 1 
@@ -63,5 +131,5 @@ func solverTest(board sudoku.Board) {
 }
 
 func main() {
-	solverTest(easySudoku())
+	solverTest(thermometerSudoku())
 }

@@ -55,8 +55,13 @@ func NewStandardBoard(initialValues map[Coordinate]int) Board {
 }
 
 // AddRules adds the specified rules to this board.
-func (b Board) AddRules(rules ...Rule) {
+func (b *Board) AddRules(rules ...Rule) {
 	b.rules = append(b.rules, rules...)
+}
+
+// AddConstraint adds the specified constraint to this board.
+func (b *Board) AddConstraint(constraints Constraint) {
+	b.constraints = append(b.constraints, constraints)
 }
 
 // Size is the size of this board.

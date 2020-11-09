@@ -37,15 +37,18 @@ func Solve(formula ConjunctiveFormula, state map[string]bool) (map[string]bool, 
 	}
 
 	litName := selectLiteral(formula)
+	// fmt.Println(litName)
 	if showIterationTimes {
 		fmt.Println(time.Since(start))
 	}
 	testState[litName] = true
+	// fmt.Println(true)
 	if solutionState, ok := Solve(formula, testState); ok {
 		return solutionState, true
 	}
 
 	testState[litName] = false
+	// fmt.Println(false)
 	if solutionState, ok := Solve(formula, testState); ok {
 		return solutionState, true
 	}

@@ -62,6 +62,29 @@ func (c ContainsValuesConstraint) Values() []int {
 	return c.values
 }
 
+// Thermometer has coordinates of increasing value.
+type Thermometer IncreasingValueConstraint
+
+// NewThermometer creates a new thermometer.
+func NewThermometer(coordinates ...Coordinate) Thermometer {
+	return Thermometer{coordinates}
+}
+
+// IncreasingValueConstraint specifies that the values in its coordinates are in strictly increasing order.
+type IncreasingValueConstraint struct {
+	coordinates []Coordinate
+}
+
+// NewIncreasingValueConstraint creates a new increasing value constraint.
+func NewIncreasingValueConstraint(coordinates ...Coordinate) IncreasingValueConstraint {
+	return IncreasingValueConstraint{coordinates}
+}
+
+// Coordinates subject to the constraint.
+func (i IncreasingValueConstraint) Coordinates() []Coordinate {
+	return i.coordinates
+}
+
 // SumConstraint specifies that each of the specified sums are equal.
 type SumConstraint struct {
 	sums []summable
