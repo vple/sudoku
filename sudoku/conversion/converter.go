@@ -1,6 +1,8 @@
 package conversion
 
 import (
+	"fmt"
+
 	sudoku ".."
 	"../../sat"
 )
@@ -17,8 +19,36 @@ func ParseState(state map[string]bool) sudoku.Board {
 	return sudoku.NewStandardBoard(initialValues)
 }
 
+func ToFormula(board sudoku.Board) (formula sat.ConjunctiveFormula) {
+	constraints := board.AllConstraints()
+
+	for _, constraint := range constraints {
+		// fmt.Printf("%T: %v\n", constraint, constraint)
+		formula = formula.And(convert(constraint, board))
+	}
+
+	return formula
+}
+
+func convert(c sudoku.Constraint, board sudoku.Board) sat.ConjunctiveFormula {
+	switch constraint := c.(type) {
+	case sudoku.CellValueConstraint:
+		literals := make([]sat.Literal, 0)
+		for _, value := range constraint.Values() {
+			literals = append(literals, toLiteral(constraint.Coordinate(), value))
+		}
+		return sat.ExactlyOneTrue(literals)
+	case sudoku.UniqueValueConstraint:
+		return uniqueValues(constraint.Coordinates(), board.AllValues())
+	case sudoku.ContainsValuesConstraint:
+		return Appears(constraint.Coordinates(), constraint.Values()...)
+	default:
+		panic(fmt.Sprintf("Unknown constraint type: %T", c))
+	}
+}
+
 // ToFormula returns the formula that defines a board.
-func ToFormula(b sudoku.Board) sat.ConjunctiveFormula {
+func ToFormula2(b sudoku.Board) sat.ConjunctiveFormula {
 	formula := sat.EmptyConjunctiveFormula()
 
 	// Constraints for individual cells.
@@ -42,7 +72,7 @@ func ToFormula(b sudoku.Board) sat.ConjunctiveFormula {
 	// Constraints for rows.
 	for _, row := range b.AllRows() {
 		// Values in each row are unique.
-		formula = formula.And(UniqueValues(row))
+		formula = formula.And(uniqueValues(row, b.AllValues()))
 		// Each value appears in each row.
 		for value := 1; value <= b.Size(); value++ {
 			formula = formula.And(Appears(row, value))
@@ -52,7 +82,7 @@ func ToFormula(b sudoku.Board) sat.ConjunctiveFormula {
 	// Constraints for cols.
 	for _, col := range b.AllCols() {
 		// Values in each col are unique.
-		formula = formula.And(UniqueValues(col))
+		formula = formula.And(uniqueValues(col, b.AllValues()))
 		// Each value appears in each col.
 		for value := 1; value <= b.Size(); value++ {
 			formula = formula.And(Appears(col, value))
@@ -62,7 +92,7 @@ func ToFormula(b sudoku.Board) sat.ConjunctiveFormula {
 	// Constraints for regions.
 	for _, region := range b.AllRegions() {
 		// Values in each region are unique.
-		formula = formula.And(UniqueValues(region))
+		formula = formula.And(uniqueValues(region, b.AllValues()))
 		// Each value appears in each region.
 		for value := 1; value <= b.Size(); value++ {
 			formula = formula.And(Appears(region, value))

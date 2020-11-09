@@ -9,6 +9,21 @@ import (
 	"./sudoku/conversion"
 )
 
+func easySudoku() sudoku.Board {
+	b := `
+	8 76 3   
+	6 9  7831
+	 31  46  
+	     6 84
+	21 7   9 
+	4  8 215 
+	     8  5
+	  542   3
+	3745  9 8
+	`
+	return sudoku.ParseBoard(b)
+}
+
 func diagonalSudoku() sudoku.Board {
 	b := `
 	 7 3 5 1 
@@ -48,5 +63,5 @@ func solverTest(board sudoku.Board) {
 }
 
 func main() {
-	solverTest(diagonalSudoku())
+	solverTest(easySudoku())
 }

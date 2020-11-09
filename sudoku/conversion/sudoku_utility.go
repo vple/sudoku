@@ -30,12 +30,12 @@ func Appears(coordinates []sudoku.Coordinate, values ...int) sat.ConjunctiveForm
 	return sat.NewConjunctiveFormula(clauses)
 }
 
-// UniqueValues specifies that all coordinates have unique values.
-func UniqueValues(coordinates []sudoku.Coordinate) sat.ConjunctiveFormula {
+// uniqueValues specifies that all coordinates have unique values.
+func uniqueValues(coordinates []sudoku.Coordinate, possibleValues []int) sat.ConjunctiveFormula {
 	clauses := make([]sat.DisjunctiveClause, 0)
 	for i, a := range coordinates {
 		for _, b := range coordinates[i+1:] {
-			for value := 1; value <= 9; value++ {
+			for _, value := range possibleValues {
 				// a != value || b != value
 				notA := toLiteral(a, value).Negate()
 				notB := toLiteral(b, value).Negate()

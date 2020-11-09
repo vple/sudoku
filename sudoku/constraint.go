@@ -15,6 +15,16 @@ func NewCellValueConstraint(coordinate Coordinate, values ...int) CellValueConst
 	return CellValueConstraint{coordinate: coordinate, values: values}
 }
 
+// Coordinate is the coordinate being constrained.
+func (c CellValueConstraint) Coordinate() Coordinate {
+	return c.coordinate
+}
+
+// Values returns the values this coordinate can contain.
+func (c CellValueConstraint) Values() []int {
+	return c.values
+}
+
 // UniqueValueConstraint specifies that its coordinates all have unique values.
 // No two coordinates have the same value.
 type UniqueValueConstraint struct {
@@ -24,6 +34,32 @@ type UniqueValueConstraint struct {
 // NewUniqueValueConstraint creates a new unique constraint.
 func NewUniqueValueConstraint(coordinates ...Coordinate) UniqueValueConstraint {
 	return UniqueValueConstraint{coordinates}
+}
+
+// Coordinates are the coordinates that must all be unique.
+func (u UniqueValueConstraint) Coordinates() []Coordinate {
+	return u.coordinates
+}
+
+// ContainsValuesConstraint specifies that at least one of its coordinates has each of the specified values.
+type ContainsValuesConstraint struct {
+	coordinates []Coordinate
+	values      []int
+}
+
+// NewContainsValuesConstraint creates a new contains values constraint.
+func NewContainsValuesConstraint(coordinates []Coordinate, values []int) ContainsValuesConstraint {
+	return ContainsValuesConstraint{coordinates, values}
+}
+
+// Coordinates subject to the constraint.
+func (c ContainsValuesConstraint) Coordinates() []Coordinate {
+	return c.coordinates
+}
+
+// Values that must appear in the constrained coordinates.
+func (c ContainsValuesConstraint) Values() []int {
+	return c.values
 }
 
 // SumConstraint specifies that each of the specified sums are equal.

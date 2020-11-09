@@ -24,14 +24,19 @@ func (b BasicSudokuRules) Apply(board Board) (constraints []Constraint) {
 		constraints = append(constraints, NewCellValueConstraint(coordinate, board.AllValues()...))
 	}
 
+	values := board.AllValues()
+
 	for _, row := range board.AllRows() {
 		constraints = append(constraints, NewUniqueValueConstraint(row...))
+		constraints = append(constraints, NewContainsValuesConstraint(row, values))
 	}
 	for _, col := range board.AllCols() {
 		constraints = append(constraints, NewUniqueValueConstraint(col...))
+		constraints = append(constraints, NewContainsValuesConstraint(col, values))
 	}
 	for _, region := range board.AllRegions() {
 		constraints = append(constraints, NewUniqueValueConstraint(region...))
+		constraints = append(constraints, NewContainsValuesConstraint(region, values))
 	}
 
 	return constraints

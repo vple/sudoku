@@ -9,13 +9,12 @@ import (
 // Board is a sudoku board.
 type Board struct {
 	// Board is assumed to be square.
-	size int
-	// RegionHeight is the number of rows in a region.
-	regionHeight int
-	// RegionWidth is the number of cols in a region.
-	regionWidth int
-	values      map[Coordinate]int
-	rules       Rules
+	size         int
+	regionHeight int // The number of rows in a region.
+	regionWidth  int // The number of cols in a region.
+	values       map[Coordinate]int
+	constraints  []Constraint // The constraints specifying the current board state. Does not have to include constraints for cell values.
+	rules        []Rule
 }
 
 // ParseBoard parses the given string representation of a board.
@@ -50,7 +49,14 @@ func NewStandardBoard(initialValues map[Coordinate]int) Board {
 		values[k] = v
 	}
 
-	return Board{size: 9, regionHeight: 3, regionWidth: 3, values: values}
+	rules := []Rule{BasicSudokuRules{}}
+
+	return Board{size: 9, regionHeight: 3, regionWidth: 3, values: values, rules: rules}
+}
+
+// AddRules adds the specified rules to this board.
+func (b Board) AddRules(rules ...Rule) {
+	b.rules = append(b.rules, rules...)
 }
 
 // Size is the size of this board.
@@ -207,6 +213,21 @@ func (b Board) KnightMoves(coordinate Coordinate) (coordinates Coordinates) {
 	}
 
 	return coordinates
+}
+
+// AllConstraints returns the constraints from the board's rules and its initial values.
+func (b Board) AllConstraints() (constraints []Constraint) {
+	for _, rule := range b.rules {
+		constraints = append(constraints, rule.Apply(b)...)
+	}
+
+	constraints = append(constraints, b.constraints...)
+
+	for coordinate, value := range b.values {
+		constraints = append(constraints, NewCellValueConstraint(coordinate, value))
+	}
+
+	return constraints
 }
 
 func (b Board) String() string {
