@@ -62,14 +62,6 @@ func (c ContainsValuesConstraint) Values() []int {
 	return c.values
 }
 
-// Thermometer has coordinates of increasing value.
-type Thermometer IncreasingValueConstraint
-
-// NewThermometer creates a new thermometer.
-func NewThermometer(coordinates ...Coordinate) Thermometer {
-	return Thermometer{coordinates}
-}
-
 // IncreasingValueConstraint specifies that the values in its coordinates are in strictly increasing order.
 type IncreasingValueConstraint struct {
 	coordinates []Coordinate

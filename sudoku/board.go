@@ -13,7 +13,7 @@ type Board struct {
 	regionHeight int // The number of rows in a region.
 	regionWidth  int // The number of cols in a region.
 	values       map[Coordinate]int
-	constraints  []Constraint // The constraints specifying the current board state. Does not have to include constraints for cell values.
+	clues        []Clue // The clues specifying additional board constraints.
 	rules        []Rule
 }
 
@@ -59,9 +59,9 @@ func (b *Board) AddRules(rules ...Rule) {
 	b.rules = append(b.rules, rules...)
 }
 
-// AddConstraint adds the specified constraint to this board.
-func (b *Board) AddConstraint(constraints Constraint) {
-	b.constraints = append(b.constraints, constraints)
+// AddClue adds the specified clue to this board.
+func (b *Board) AddClue(clue Clue) {
+	b.clues = append(b.clues, clue)
 }
 
 // Size is the size of this board.
@@ -226,7 +226,9 @@ func (b Board) AllConstraints() (constraints []Constraint) {
 		constraints = append(constraints, rule.Apply(b)...)
 	}
 
-	constraints = append(constraints, b.constraints...)
+	for _, clue := range b.clues {
+		constraints = append(constraints, clue.Apply(b)...)
+	}
 
 	for coordinate, value := range b.values {
 		constraints = append(constraints, NewCellValueConstraint(coordinate, value))
