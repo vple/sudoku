@@ -57,24 +57,26 @@ func sum(literals sat.Literals) (sum int) {
 	return sum
 }
 
+// unverified
+
 // SumEquals returns the formula specifying that the sums of the values of the given coordinates equals the desired sum.
-func SumEquals(coordinates sudoku.Coordinates, total int) sat.ConjunctiveFormula {
-	var allCombinations []sat.Literals = allPermutations(coordinates)
-	clauses := make([]sat.DisjunctiveClause, 0)
+func SumEquals(coordinates sudoku.Coordinates, values []int, total int) sat.ConjunctiveFormula {
+	var allCombinations []sat.Literals = allPermutations(coordinates, values)
+	clauses := make([]sat.ConjunctiveClause, 0)
 	for _, combination := range allCombinations {
 		if sum(combination) == total {
-			clauses = append(clauses, sat.NewDisjunctiveClause(combination...))
+			clauses = append(clauses, sat.NewConjunctiveClause(combination...))
 		}
 	}
 
-	return sat.NewConjunctiveFormula(clauses)
+	return sat.NewDisjunctiveFormula(clauses).ToCNF()
 }
 
 // allPermutations determines all possible permuations for the specified cells.
-func allPermutations(coordinates sudoku.Coordinates) []sat.Literals {
+func allPermutations(coordinates sudoku.Coordinates, values []int) []sat.Literals {
 	literals := make([]sat.Literals, 0)
 	for _, coordinate := range coordinates {
-		literals = append(literals, toLiterals(coordinate))
+		literals = append(literals, toLiterals(coordinate, values))
 	}
 	return sat.Multiply(literals...)
 }

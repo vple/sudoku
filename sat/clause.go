@@ -36,10 +36,13 @@ func (c DisjunctiveClause) Evaluate(state map[string]bool) interface{} {
 	}
 
 	remainingLiterals := make(map[Literal]bool, 0)
+	remainingComposites := make([]CompositeLiteral, 0)
 
 	for _, literal := range c.literals {
 		// value := literal.Evaluate(state)
 		switch value := literal.Evaluate(state).(type) {
+		case CompositeLiteral:
+			remainingComposites = append(remainingComposites, value)
 		case Literal:
 			if _, ok := remainingLiterals[value]; ok {
 				// OR(x, x, ...) = OR(x, ...)
@@ -60,13 +63,16 @@ func (c DisjunctiveClause) Evaluate(state map[string]bool) interface{} {
 		}
 	}
 
-	if len(remainingLiterals) == 0 {
+	if len(remainingLiterals) == 0 && len(remainingComposites) == 0 {
 		return false
 	}
 
 	literals := make([]Literal, 0)
 	for k := range remainingLiterals {
 		literals = append(literals, k)
+	}
+	for _, literal := range remainingComposites {
+		literals = append(literals, literal)
 	}
 	return DisjunctiveClause{literals}
 }

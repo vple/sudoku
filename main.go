@@ -54,7 +54,9 @@ func solverTest(board sudoku.Board) {
 
 	fmt.Println("\nSolving...")
 	start := time.Now()
-	results, ok := sat.Solve(formula, make(map[string]bool))
+	results, ok := sat.Solve(formula, make(map[string]bool), func(state map[string]bool) string {
+		return conversion.ParseState(state).String() + "\n"
+	})
 	duration := time.Since(start)
 
 	board = conversion.ParseState(results)
@@ -63,5 +65,6 @@ func solverTest(board sudoku.Board) {
 }
 
 func main() {
-	solverTest(thermoAMS())
+	// solverTest(killerTest())
+	solverTest(lightsaber())
 }

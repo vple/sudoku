@@ -31,10 +31,10 @@ func fromName(name string) (sudoku.Coordinate, int) {
 }
 
 // toLiterals returns literals that represent all possible states for this cell.
-func toLiterals(c sudoku.Coordinate) []sat.Literal {
+func toLiterals(coordinate sudoku.Coordinate, values []int) []sat.Literal {
 	literals := make([]sat.Literal, 0)
-	for i := 1; i <= 9; i++ {
-		literals = append(literals, toLiteral(c, i))
+	for _, value := range values {
+		literals = append(literals, toLiteral(coordinate, value))
 	}
 	return literals
 }

@@ -77,6 +77,27 @@ func (i IncreasingValueConstraint) Coordinates() []Coordinate {
 	return i.coordinates
 }
 
+// ConstantSumConstraint specifies that the given cells sum to the specified constant.
+type ConstantSumConstraint struct {
+	coordinates []Coordinate
+	sum         int
+}
+
+// NewConstantSumConstraint creates a new ConstantSumConstraint.
+func NewConstantSumConstraint(coordinates []Coordinate, sum int) ConstantSumConstraint {
+	return ConstantSumConstraint{coordinates, sum}
+}
+
+// Coordinates subject to the constraint.
+func (c ConstantSumConstraint) Coordinates() []Coordinate {
+	return c.coordinates
+}
+
+// Sum is the sum of the coordinates.
+func (c ConstantSumConstraint) Sum() int {
+	return c.sum
+}
+
 // SumConstraint specifies that each of the specified sums are equal.
 type SumConstraint struct {
 	sums []summable

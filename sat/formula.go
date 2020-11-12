@@ -83,6 +83,11 @@ type DisjunctiveFormula struct {
 	clauses []ConjunctiveClause
 }
 
+// NewDisjunctiveFormula creates a formula with the given clauses.
+func NewDisjunctiveFormula(clauses []ConjunctiveClause) DisjunctiveFormula {
+	return DisjunctiveFormula{clauses: clauses}
+}
+
 // Evaluate evaluates this formula, returning a simplified formula or a bool.
 func (f DisjunctiveFormula) Evaluate(state map[string]bool) interface{} {
 	remainingClauses := make([]ConjunctiveClause, 0)
